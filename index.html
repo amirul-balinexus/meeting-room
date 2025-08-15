@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meeting Room Calendars</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Home Page -->
+        <div id="home-page" class="page active">
+            <div class="container">
+                <div class="header">
+                    <h1>Meeting Room Calendars</h1>
+                    <p>Select a room to view its calendar and availability</p>
+                </div>
+
+                <div class="rooms-grid" id="rooms-grid">
+                    <!-- Room cards will be dynamically generated here -->
+                </div>
+
+                <div class="footer">
+                    <p>Each room calendar refreshes automatically every 5 minutes and supports fullscreen view. Please find the documentations 
+                        <span>
+                            <a href="/demo.html">here</a>
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Room Page -->
+        <div id="room-page" class="page">
+            <div class="room-container">
+                <iframe id="calendar-iframe" frameborder="0" scrolling="no"></iframe>
+                
+                <div class="room-title" id="room-title"></div>
+                
+                <button class="fullscreen-btn" id="fullscreen-btn">
+                    Full Screen Preview
+                </button>
+                
+                <button class="back-btn" id="back-btn">
+                    ← Back to Rooms
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

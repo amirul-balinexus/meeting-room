@@ -1,0 +1,324 @@
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #f3f4f6;
+    color: #111827;
+    line-height: 1.6;
+}
+
+/* Page management */
+.page {
+    display: none;
+    min-height: 100vh;
+}
+
+.page.active {
+    display: block;
+}
+
+/* Home Page Styles */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 48px 16px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 48px;
+}
+
+.header h1 {
+    font-size: 2.25rem;
+    font-weight: bold;
+    color: #111827;
+    margin-bottom: 16px;
+}
+
+.header p {
+    font-size: 1.25rem;
+    color: #4b5563;
+}
+
+/* Rooms Grid */
+.rooms-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    margin-bottom: 48px;
+}
+
+@media (min-width: 768px) {
+    .rooms-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .rooms-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Room Cards */
+.room-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    transform: scale(1);
+}
+
+.room-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.room-color {
+    height: 16px;
+}
+
+.room-color.agung {
+    background-color: #9333ea;
+}
+
+.room-color.bali {
+    background-color: #dc2626;
+}
+
+.room-color.java {
+    background-color: #16a34a;
+}
+
+.room-color.sumatra {
+    background-color: #FF6B35;
+}
+
+.room-color.lombok {
+    background-color: #00CED1;
+}
+
+.room-color.sulawesi {
+    background-color: #9C27B0;
+}
+
+.room-content {
+    padding: 24px;
+}
+
+.room-content h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 8px;
+    transition: color 0.3s ease;
+}
+
+.room-card:hover .room-content h3 {
+    color: #9333ea;
+}
+
+.room-content p {
+    color: #4b5563;
+    margin-bottom: 16px;
+}
+
+.view-calendar {
+    display: flex;
+    align-items: center;
+    color: #9333ea;
+    font-weight: 500;
+}
+
+.arrow {
+    width: 16px;
+    height: 16px;
+    margin-left: 8px;
+    transition: transform 0.3s ease;
+}
+
+.room-card:hover .arrow {
+    transform: translateX(4px);
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+}
+
+.footer p {
+    color: #6b7280;
+}
+
+/* Room Page Styles */
+.room-container {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#calendar-iframe {
+    border: solid 1px #777;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* Room Title Overlay */
+.room-title {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 8px 16px;
+    border-radius: 4px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #111827;
+}
+
+/* Fullscreen Button */
+.fullscreen-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 10;
+    padding: 8px 16px;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.fullscreen-btn.agung {
+    background-color: #7c3aed;
+}
+
+.fullscreen-btn.agung:hover {
+    background-color: #6d28d9;
+}
+
+.fullscreen-btn.bali {
+    background-color: #b91c1c;
+}
+
+.fullscreen-btn.bali:hover {
+    background-color: #991b1b;
+}
+
+.fullscreen-btn.java {
+    background-color: #16a34a;
+}
+
+.fullscreen-btn.java:hover {
+    background-color: #15803d;
+}
+
+.fullscreen-btn.sumatra {
+    background-color: #FF6B35;
+}
+
+.fullscreen-btn.sumatra:hover {
+    background-color: #E55A2B;
+}
+
+.fullscreen-btn.lombok {
+    background-color: #00CED1;
+}
+
+.fullscreen-btn.lombok:hover {
+    background-color: #00B8BB;
+}
+
+.fullscreen-btn.sulawesi {
+    background-color: #9C27B0;
+}
+
+.fullscreen-btn.sulawesi:hover {
+    background-color: #7B1FA2;
+}
+
+.fullscreen-btn:focus {
+    outline: none;
+}
+
+/* Back Button */
+.back-btn {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    z-index: 10;
+    padding: 8px 16px;
+    background-color: #4b5563;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 14px;
+}
+
+.back-btn:hover {
+    background-color: #374151;
+}
+
+.back-btn:focus {
+    outline: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding: 24px 16px;
+    }
+    
+    .header h1 {
+        font-size: 1.875rem;
+    }
+    
+    .header p {
+        font-size: 1.125rem;
+    }
+    
+    .room-content {
+        padding: 16px;
+    }
+    
+    .room-title {
+        font-size: 1.25rem;
+        top: 8px;
+        left: 8px;
+    }
+    
+    .fullscreen-btn,
+    .back-btn {
+        font-size: 12px;
+        padding: 6px 12px;
+        top: 8px;
+        right: 8px;
+    }
+    
+    .back-btn {
+        bottom: 8px;
+        left: 8px;
+    }
+}
