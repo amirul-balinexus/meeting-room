@@ -76,17 +76,17 @@ function init() {
   fullscreenBtn.addEventListener("click", toggleFullscreen);
   backBtn.addEventListener("click", goHome);
 
-  // Handle browser back/forward buttons
-  window.addEventListener("popstate", handlePopState);
+  // Handle hash changes instead of browser back/forward buttons
+  window.addEventListener("hashchange", handleHashChange);
 
-  // Check if we should show a specific room (for direct URL access)
-  const path = window.location.pathname;
-  if (path !== "/" && path !== "") {
-    const roomSlug = path.substring(1); // Remove leading slash
-    if (roomConfigs[roomSlug]) {
-      navigateToRoom(roomSlug);
-    }
-  }
+  // Handle fullscreen change events
+  document.addEventListener("fullscreenchange", handleFullscreenChange);
+  document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+  document.addEventListener("mozfullscreenchange", handleFullscreenChange);
+  document.addEventListener("MSFullscreenChange", handleFullscreenChange);
+
+  // Check initial hash on page load
+  handleHashChange();
 }
 
 // Navigation functions
@@ -99,8 +99,8 @@ function navigateToRoom(roomSlug) {
 
   currentRoom = roomSlug;
 
-  // Update browser history
-  window.history.pushState({ room: roomSlug }, "", `/${roomSlug}`);
+  // Update URL hash instead of browser history
+  window.location.hash = `#${roomSlug}`;
 
   // Show room page
   showRoomPage(roomConfig);
@@ -109,21 +109,23 @@ function navigateToRoom(roomSlug) {
 function goHome() {
   currentRoom = null;
 
-  // Update browser history
-  window.history.pushState({}, "", "/");
+  // Update URL hash to root
+  window.location.hash = "";
 
   // Show home page
   showHomePage();
 }
 
-function handlePopState(event) {
-  if (event.state && event.state.room) {
-    const roomConfig = roomConfigs[event.state.room];
-    if (roomConfig) {
-      currentRoom = event.state.room;
-      showRoomPage(roomConfig);
-    }
+// Handle hash changes
+function handleHashChange() {
+  const hash = window.location.hash.substring(1); // Remove leading #
+
+  if (hash && roomConfigs[hash]) {
+    // Show specific room
+    currentRoom = hash;
+    showRoomPage(roomConfigs[hash]);
   } else {
+    // Show home page
     currentRoom = null;
     showHomePage();
   }
@@ -195,49 +197,252 @@ function toggleFullscreen() {
   const roomConfig = roomConfigs[currentRoom];
   if (!roomConfig) return;
 
+  // Try to use the Fullscreen API first
+  if (
+    document.fullscreenElement ||
+    document.webkitFullscreenElement ||
+    document.mozFullScreenElement ||
+    document.msFullscreenElement
+  ) {
+    // Exit fullscreen if already in fullscreen
+    exitFullscreen();
+    return;
+  }
+
+  // Create fullscreen overlay container
+  const fullscreenContainer = document.createElement("div");
+  fullscreenContainer.id = "fullscreen-container";
+  fullscreenContainer.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: white;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+  `;
+
+  // Create header with room title and close button
+  const header = document.createElement("div");
+  header.style.cssText = `
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    min-height: 60px;
+  `;
+
+  const title = document.createElement("h2");
+  title.textContent = roomConfig.title;
+  title.style.cssText = `
+    margin: 0;
+    color: #333;
+    font-size: 1.5rem;
+    font-weight: bold;
+  `;
+
+  const closeBtn = document.createElement("button");
+  closeBtn.innerHTML = "✕ Close Fullscreen";
+  closeBtn.style.cssText = `
+    padding: 10px 20px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+  `;
+
+  closeBtn.addEventListener("mouseenter", () => {
+    closeBtn.style.backgroundColor = "#c82333";
+  });
+
+  closeBtn.addEventListener("mouseleave", () => {
+    closeBtn.style.backgroundColor = "#dc3545";
+  });
+
   // Create fullscreen iframe
   const fullscreenIframe = document.createElement("iframe");
   fullscreenIframe.src = buildCalendarUrl(roomConfig);
   fullscreenIframe.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        border: none;
-        z-index: 9999;
-        background: white;
-    `;
-
-  // Add close button
-  const closeBtn = document.createElement("button");
-  closeBtn.textContent = "✕ Close Fullscreen";
-  closeBtn.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 10000;
-        padding: 10px 20px;
-        background: rgba(0, 0, 0, 0.8);
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 14px;
-    `;
+    flex: 1;
+    border: none;
+    width: 100%;
+    height: 100%;
+    background: white;
+  `;
 
   // Add event listeners
   closeBtn.addEventListener("click", () => {
-    document.body.removeChild(fullscreenIframe);
-    document.body.removeChild(closeBtn);
+    exitFullscreen();
   });
 
+  // Keyboard shortcut to exit fullscreen (Escape key)
+  const handleKeyDown = (event) => {
+    if (event.key === "Escape") {
+      exitFullscreen();
+    }
+  };
+
   // Add to DOM
-  document.body.appendChild(fullscreenIframe);
-  document.body.appendChild(closeBtn);
+  header.appendChild(title);
+  header.appendChild(closeBtn);
+  fullscreenContainer.appendChild(header);
+  fullscreenContainer.appendChild(fullscreenIframe);
+  document.body.appendChild(fullscreenContainer);
+
+  // Add keyboard event listener
+  document.addEventListener("keydown", handleKeyDown);
 
   // Focus on iframe
   fullscreenIframe.focus();
+
+  // Try to enter fullscreen mode
+  enterFullscreen(fullscreenContainer);
+
+  // Store reference for cleanup
+  window.currentFullscreenContainer = fullscreenContainer;
+  window.currentFullscreenKeyHandler = handleKeyDown;
+}
+
+// Handle fullscreen change events
+function handleFullscreenChange() {
+  // If user exits fullscreen using browser controls, clean up our overlay
+  if (
+    !document.fullscreenElement &&
+    !document.webkitFullscreenElement &&
+    !document.mozFullScreenElement &&
+    !document.msFullscreenElement
+  ) {
+    if (window.currentFullscreenContainer) {
+      exitFullscreen();
+    }
+  }
+}
+
+// Enter fullscreen function
+function enterFullscreen(element) {
+  if (element.requestFullscreen) {
+    element.requestFullscreen().catch((err) => {
+      console.log("Fullscreen API not supported or permission denied:", err);
+      showFullscreenFallback();
+    });
+  } else if (element.webkitRequestFullscreen) {
+    element.webkitRequestFullscreen().catch((err) => {
+      console.log(
+        "Webkit Fullscreen API not supported or permission denied:",
+        err
+      );
+      showFullscreenFallback();
+    });
+  } else if (element.mozRequestFullScreen) {
+    element.mozRequestFullScreen().catch((err) => {
+      console.log(
+        "Mozilla Fullscreen API not supported or permission denied:",
+        err
+      );
+      showFullscreenFallback();
+    });
+  } else if (element.msRequestFullscreen) {
+    element.msRequestFullscreen().catch((err) => {
+      console.log("MS Fullscreen API not supported or permission denied:", err);
+      showFullscreenFallback();
+    });
+  } else {
+    // Browser doesn't support Fullscreen API, show fallback
+    showFullscreenFallback();
+  }
+}
+
+// Show fallback message for unsupported browsers
+function showFullscreenFallback() {
+  // Create a notification banner
+  const banner = document.createElement("div");
+  banner.style.cssText = `
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #17a2b8;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 10001;
+    font-size: 14px;
+    max-width: 400px;
+    text-align: center;
+  `;
+
+  banner.innerHTML = `
+    <div style="margin-bottom: 8px;">
+      <strong>Fullscreen Mode Active</strong>
+    </div>
+    <div style="font-size: 12px; opacity: 0.9;">
+      Press ESC or click the close button to exit
+    </div>
+  `;
+
+  document.body.appendChild(banner);
+
+  // Auto-remove after 5 seconds
+  setTimeout(() => {
+    if (banner.parentNode) {
+      banner.parentNode.removeChild(banner);
+    }
+  }, 5000);
+
+  // Store reference for cleanup
+  window.currentFullscreenBanner = banner;
+}
+
+// Exit fullscreen function
+function exitFullscreen() {
+  // Remove fullscreen container
+  if (window.currentFullscreenContainer) {
+    document.body.removeChild(window.currentFullscreenContainer);
+    window.currentFullscreenContainer = null;
+  }
+
+  // Remove notification banner
+  if (window.currentFullscreenBanner) {
+    if (window.currentFullscreenBanner.parentNode) {
+      window.currentFullscreenBanner.parentNode.removeChild(
+        window.currentFullscreenBanner
+      );
+    }
+    window.currentFullscreenBanner = null;
+  }
+
+  // Remove keyboard event listener
+  if (window.currentFullscreenKeyHandler) {
+    document.removeEventListener("keydown", window.currentFullscreenKeyHandler);
+    window.currentFullscreenKeyHandler = null;
+  }
+
+  // Exit fullscreen if browser is in fullscreen mode
+  if (
+    document.fullscreenElement ||
+    document.webkitFullscreenElement ||
+    document.mozFullScreenElement ||
+    document.msFullscreenElement
+  ) {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    } else if (document.mozCancelFullScreen) {
+      document.mozCancelFullScreen();
+    } else if (document.msExitFullscreen) {
+      document.msExitFullscreen();
+    }
+  }
 }
 
 // Initialize when DOM is loaded

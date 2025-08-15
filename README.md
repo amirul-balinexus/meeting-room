@@ -7,10 +7,10 @@ This is a native HTML/CSS/JavaScript implementation of the Meeting Room Calendar
 -   **Home Page**: Grid layout of meeting rooms with hover effects
 -   **Room Pages**: Full-screen Google Calendar integration for each room
 -   **Responsive Design**: Works on desktop, tablet, and mobile devices
--   **Client-side Routing**: Browser back/forward button support
+-   **Single URL Navigation**: All navigation happens on the root URL using hash fragments
 -   **Auto-refresh**: Calendars refresh every 5 minutes
 -   **Fullscreen Mode**: Dedicated fullscreen view for each room
--   **Direct URL Access**: Can navigate directly to room URLs
+-   **Direct Room Access**: Navigate directly to rooms using hash URLs (e.g., `/#agung-room`)
 -   **Dynamic Room Management**: Add, update, and manage rooms programmatically
 
 ## File Structure
@@ -48,11 +48,13 @@ Each room uses the same Google Calendar ID but with different colors and titles.
 
 ## Features Explained
 
-### Client-side Routing
+### Single URL Navigation
 
--   Uses `window.history.pushState()` for navigation
--   Handles browser back/forward buttons
--   Updates URL without page reload
+-   Uses hash fragments (`#room-name`) instead of separate URLs
+-   All navigation happens on the root URL (`/`)
+-   Browser back/forward buttons work with hash changes
+-   No page reloads or server requests needed
+-   Easy to bookmark specific rooms
 
 ### Auto-refresh
 
